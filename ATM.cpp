@@ -656,3 +656,174 @@ public:
             break;
         }
     }
+void run()
+{
+    while (window.isOpen())
+    {
+        handleEvents();
+        update();
+        render();
+    }
+}
+
+private:
+    void handleEvents()
+    {
+        sf::Event event;
+        mousePressed = false;
+
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                atm.saveToFile();
+                window.close();
+            }
+
+            for (int i = 0; i < textBoxCount; i++)
+                textBoxes[i].handleInput(event);
+
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                mousePressed = true;
+                sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+                for (int i = 0; i < buttonCount; i++)
+                {
+                    if (buttons[i].isClicked(mousePos))
+                        handleButtonClick(i);
+                }
+            }
+        }
+    }
+
+    void update()
+    {
+        sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+        for (int i = 0; i < buttonCount; i++)
+            buttons[i].update(mousePos);
+
+        for (int i = 0; i < textBoxCount; i++)
+            textBoxes[i].update(mousePos, mousePressed);
+
+        if (messageClock.getElapsedTime().asSeconds() > 3.0f)
+            messageText.clear();
+    }
+
+    void render()
+    {
+        window.clear(sf::Color::White);
+
+        // Draw background FIRST
+        window.draw(backgroundSprite);
+
+        switch (currentScreen)
+        {
+        case MAIN_MENU:
+            drawTitle("");
+            drawMainInfo();
+            break;
+        case ADMIN_LOGIN:
+            drawTitle("Admin Login");
+            drawAdminLoginLabels();
+            break;
+        case USER_LOGIN:
+            drawTitle("User Login");
+            drawUserLoginLabels();
+            break;
+        case USER_MENU:
+            drawTitle("User Menu");
+            drawUserInfo();
+            break;
+        case CHECK_BALANCE:
+            drawTitle("Check Balance");
+            drawCheckBalance();
+            break;
+        case DEPOSIT:
+            drawTitle("Deposit Money");
+            drawDepositLabel();
+            break;
+        case WITHDRAW:
+            drawTitle("Withdraw Money");
+            drawWithdrawLabel();
+            break;
+        case TRANSFER:
+            drawTitle("Transfer Money");
+            drawTransferLabels();
+            break;
+        case HISTORY:
+            drawTitle("Transaction History");
+            drawHistory();
+            break;
+        case FIRST_SETUP:
+            drawTitle("First Time Setup");
+            drawSetupLabels();
+            break;
+        case ADMIN_CREATE_ACCOUNT:
+            drawTitle("Create New Account");
+            drawSetupLabels();
+            break;
+        }
+
+        for (int i = 0; i < buttonCount; i++)
+            buttons[i].draw(window);
+
+        for (int i = 0; i < textBoxCount; i++)
+            textBoxes[i].draw(window);
+
+        drawMessage();
+
+        window.display();
+    }
+
+    void drawTitle(const string& title)
+    {
+        sf::Text titleText(title, font, 48);
+        titleText.setFillColor(sf::Color::White);
+        titleText.setOutlineThickness(2.f);
+        titleText.setOutlineColor(sf::Color::Black);
+        float x = (window.getSize().x - titleText.getLocalBounds().width) / 2;
+        titleText.setPosition(x, 30);
+        window.draw(titleText);
+    }
+
+    void drawMessage()
+    {
+        if (messageText.empty())
+            return;
+
+        sf::Text msgText(messageText, font, 24);
+        msgText.setFillColor(sf::Color::Yellow);
+        msgText.setOutlineThickness(1.f);
+        msgText.setOutlineColor(sf::Color::Black);
+        float x = (window.getSize().x - msgText.getLocalBounds().width) / 2;
+        msgText.setPosition(x, window.getSize().y - 80);
+        window.draw(msgText);
+    }
+
+    void drawMainInfo()
+    {
+        sf::Text infoText("Welcome to ATM System", font, 34);
+        infoText.setFillColor(sf::Color::White);
+        infoText.setOutlineThickness(1.f);
+        infoText.setOutlineColor(sf::Color::Black);
+        infoText.setPosition(780, 900);
+        window.draw(infoText);
+    }
+
+    void drawAdminLoginLabels()
+    {
+        sf::Text usernameLabel("Username:", font, 24);
+        usernameLabel.setFillColor(sf::Color::White);
+        usernameLabel.setOutlineThickness(1.f);
+        usernameLabel.setOutlineColor(sf::Color::Black);
+        usernameLabel.setPosition(300, 300);
+        window.draw(usernameLabel);
+
+        sf::Text passwordLabel("Password:", font, 24);
+        passwordLabel.setFillColor(sf::Color::White);
+        passwordLabel.setOutlineThickness(1.f);
+        passwordLabel.setOutlineColor(sf::Color::Black);
+        passwordLabel.setPosition(300, 420);
+        window.draw(passwordLabel);
+    }

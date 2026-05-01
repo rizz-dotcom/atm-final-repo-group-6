@@ -827,3 +827,241 @@ private:
         passwordLabel.setPosition(300, 420);
         window.draw(passwordLabel);
     }
+    void drawUserLoginLabels()
+    {
+        sf::Text accLabel("Account Number:", font, 24);
+        accLabel.setFillColor(sf::Color::White);
+        accLabel.setOutlineThickness(1.f);
+        accLabel.setOutlineColor(sf::Color::Black);
+        accLabel.setPosition(300, 300);
+        window.draw(accLabel);
+
+        sf::Text pinLabel("PIN:", font, 24);
+        pinLabel.setFillColor(sf::Color::White);
+        pinLabel.setOutlineThickness(1.f);
+        pinLabel.setOutlineColor(sf::Color::Black);
+        pinLabel.setPosition(300, 420);
+        window.draw(pinLabel);
+    }
+
+    void drawUserInfo()
+    {
+        if (!currentUser) return;
+
+        string userInfo = "Welcome! Account: " + to_string(currentUser->getAccNo()) +
+            " | Balance: $" + to_string(currentUser->getBalance());
+        sf::Text infoText(userInfo, font, 22);
+        infoText.setFillColor(sf::Color::White);
+        infoText.setOutlineThickness(1.f);
+        infoText.setOutlineColor(sf::Color::Black);
+        infoText.setPosition(100, 150);
+        window.draw(infoText);
+    }
+
+    void drawCheckBalance()
+    {
+        if (!currentUser) return;
+
+        string balanceStr = "Your Balance: $" + to_string(currentUser->getBalance());
+        sf::Text balanceText(balanceStr, font, 48);
+        balanceText.setFillColor(sf::Color::Yellow);
+        balanceText.setOutlineThickness(2.f);
+        balanceText.setOutlineColor(sf::Color::Black);
+        float x = (window.getSize().x - balanceText.getLocalBounds().width) / 2;
+        balanceText.setPosition(x, 400);
+        window.draw(balanceText);
+    }
+
+    void drawDepositLabel()
+    {
+        sf::Text amountLabel("Amount: $", font, 24);
+        amountLabel.setFillColor(sf::Color::White);
+        amountLabel.setOutlineThickness(1.f);
+        amountLabel.setOutlineColor(sf::Color::Black);
+        amountLabel.setPosition(300, 350);
+        window.draw(amountLabel);
+    }
+
+    void drawWithdrawLabel()
+    {
+        sf::Text amountLabel("Amount: $", font, 24);
+        amountLabel.setFillColor(sf::Color::White);
+        amountLabel.setOutlineThickness(1.f);
+        amountLabel.setOutlineColor(sf::Color::Black);
+        amountLabel.setPosition(300, 350);
+        window.draw(amountLabel);
+    }
+
+    void drawTransferLabels()
+    {
+        sf::Text targetLabel("Target Account:", font, 24);
+        targetLabel.setFillColor(sf::Color::White);
+        targetLabel.setOutlineThickness(1.f);
+        targetLabel.setOutlineColor(sf::Color::Black);
+        targetLabel.setPosition(300, 300);
+        window.draw(targetLabel);
+
+        sf::Text amountLabel("Amount: $", font, 24);
+        amountLabel.setFillColor(sf::Color::White);
+        amountLabel.setOutlineThickness(1.f);
+        amountLabel.setOutlineColor(sf::Color::Black);
+        amountLabel.setPosition(300, 420);
+        window.draw(amountLabel);
+    }
+
+    void drawHistory()
+    {
+        if (!currentUser) return;
+
+        Transaction* historyArray = currentUser->getHistoryArray();
+        int historyCount = currentUser->getHistoryCount();
+
+        int y = 150;
+        if (historyCount == 0)
+        {
+            sf::Text noTransText("No transactions yet.", font, 24);
+            noTransText.setFillColor(sf::Color::White);
+            noTransText.setOutlineThickness(1.f);
+            noTransText.setOutlineColor(sf::Color::Black);
+            noTransText.setPosition(600, 400);
+            window.draw(noTransText);
+        }
+        else
+        {
+            for (int i = 0; i < historyCount; i++)
+            {
+                sf::Text transText(historyArray[i].toString(), font, 16);
+                transText.setFillColor(sf::Color::White);
+                transText.setOutlineThickness(1.f);
+                transText.setOutlineColor(sf::Color::Black);
+                transText.setPosition(50, y);
+                window.draw(transText);
+                y += 45;
+            }
+        }
+    }
+
+    void drawSetupLabels()
+    {
+        sf::Text typeLabel("Account Type (1=Saving, 2=Current):", font, 18);
+        typeLabel.setFillColor(sf::Color::White);
+        typeLabel.setOutlineThickness(1.f);
+        typeLabel.setOutlineColor(sf::Color::Black);
+        typeLabel.setPosition(200, 200);
+        window.draw(typeLabel);
+
+        sf::Text accLabel("Account Number (6 digits):", font, 18);
+        accLabel.setFillColor(sf::Color::White);
+        accLabel.setOutlineThickness(1.f);
+        accLabel.setOutlineColor(sf::Color::Black);
+        accLabel.setPosition(200, 320);
+        window.draw(accLabel);
+
+        sf::Text pinLabel("PIN (4 digits):", font, 18);
+        pinLabel.setFillColor(sf::Color::White);
+        pinLabel.setOutlineThickness(1.f);
+        pinLabel.setOutlineColor(sf::Color::Black);
+        pinLabel.setPosition(200, 440);
+        window.draw(pinLabel);
+
+        sf::Text balLabel("Initial Balance: $", font, 18);
+        balLabel.setFillColor(sf::Color::White);
+        balLabel.setOutlineThickness(1.f);
+        balLabel.setOutlineColor(sf::Color::Black);
+        balLabel.setPosition(200, 560);
+        window.draw(balLabel);
+    }
+
+    void handleButtonClick(int buttonIndex)
+    {
+        switch (currentScreen)
+        {
+        case MAIN_MENU:
+            if (buttonIndex == 0)
+                switchScreen(ADMIN_LOGIN);
+            else if (buttonIndex == 1)
+                switchScreen(USER_LOGIN);
+            else if (buttonIndex == 2)
+            {
+                atm.saveToFile();
+                window.close();
+            }
+            break;
+
+        case ADMIN_LOGIN:
+            if (buttonIndex == 0)
+                handleAdminLogin();
+            else if (buttonIndex == 1)
+                switchScreen(MAIN_MENU);
+            break;
+
+        case USER_LOGIN:
+            if (buttonIndex == 0)
+                handleUserLogin();
+            else if (buttonIndex == 1)
+                switchScreen(MAIN_MENU);
+            break;
+
+        case USER_MENU:
+            if (buttonIndex == 0)
+                switchScreen(CHECK_BALANCE);
+            else if (buttonIndex == 1)
+                switchScreen(DEPOSIT);
+            else if (buttonIndex == 2)
+                switchScreen(WITHDRAW);
+            else if (buttonIndex == 3)
+                switchScreen(TRANSFER);
+            else if (buttonIndex == 4)
+                switchScreen(HISTORY);
+            else if (buttonIndex == 5)
+            {
+                currentUser = nullptr;
+                atm.saveToFile();
+                switchScreen(MAIN_MENU);
+            }
+            break;
+
+        case CHECK_BALANCE:
+            if (buttonIndex == 0)
+                switchScreen(USER_MENU);
+            break;
+
+        case DEPOSIT:
+            if (buttonIndex == 0)
+                handleDeposit();
+            else if (buttonIndex == 1)
+                switchScreen(USER_MENU);
+            break;
+
+        case WITHDRAW:
+            if (buttonIndex == 0)
+                handleWithdraw();
+            else if (buttonIndex == 1)
+                switchScreen(USER_MENU);
+            break;
+
+        case TRANSFER:
+            if (buttonIndex == 0)
+                handleTransfer();
+            else if (buttonIndex == 1)
+                switchScreen(USER_MENU);
+            break;
+
+        case HISTORY:
+            if (buttonIndex == 0)
+                switchScreen(USER_MENU);
+            break;
+
+        case FIRST_SETUP:
+            if (buttonIndex == 0)
+                handleFirstSetup();
+            break;
+
+        case ADMIN_CREATE_ACCOUNT:
+            if (buttonIndex == 0)
+                handleAdminCreateAccount();
+            else if (buttonIndex == 1)
+                switchScreen(ADMIN_LOGIN);
+            break;
+        }
+    }

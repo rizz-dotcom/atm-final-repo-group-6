@@ -1065,3 +1065,200 @@ private:
             break;
         }
     }
+    void handleAdminLogin()
+    {
+        string user = textBoxes[0].content;
+        string pass = textBoxes[1].content;
+
+        if (atm.adminLogin(user, pass))
+        {
+            switchScreen(ADMIN_CREATE_ACCOUNT);
+        }
+        else
+        {
+            messageText = "Invalid Credentials!";
+            messageClock.restart();
+        }
+    }
+
+    void handleUserLogin()
+    {
+        try
+        {
+            int accNo = stoi(textBoxes[0].content);
+            int pin = stoi(textBoxes[1].content);
+
+            currentUser = atm.userLogin(accNo, pin);
+            if (currentUser)
+            {
+                switchScreen(USER_MENU);
+            }
+            else
+            {
+                messageText = "Invalid Credentials!";
+                messageClock.restart();
+            }
+        }
+        catch (...)
+        {
+            messageText = "Invalid input!";
+            messageClock.restart();
+        }
+    }
+
+    void handleDeposit()
+    {
+        try
+        {
+            double amount = stod(textBoxes[0].content);
+            if (amount <= 0)
+            {
+                messageText = "Amount must be positive!";
+            }
+            else if (currentUser->deposit(amount))
+            {
+                messageText = "Deposit Successful!";
+                atm.saveToFile();
+                switchScreen(USER_MENU);
+            }
+            else
+            {
+                messageText = "Deposit Failed!";
+            }
+        }
+        catch (...)
+        {
+            messageText = "Invalid amount!";
+        }
+        messageClock.restart();
+    }
+
+    void handleWithdraw()
+    {
+        try
+        {
+            double amount = stod(textBoxes[0].content);
+            if (amount <= 0)
+            {
+                messageText = "Amount must be positive!";
+            }
+            else if (currentUser->withdraw(amount))
+            {
+                messageText = "Withdrawal Successful!";
+                atm.saveToFile();
+                switchScreen(USER_MENU);
+            }
+            else
+            {
+                messageText = "Insufficient balance!";
+            }
+        }
+        catch (...)
+        {
+            messageText = "Invalid amount!";
+        }
+        messageClock.restart();
+    }
+
+    void handleTransfer()
+    {
+        try
+        {
+            int targetAcc = stoi(textBoxes[0].content);
+            double amount = stod(textBoxes[1].content);
+
+            Account* target = atm.findAccount(targetAcc);
+            if (!target)
+            {
+                messageText = "Target account not found!";
+            }
+            else if (amount <= 0)
+            {
+                messageText = "Amount must be positive!";
+            }
+            else if (currentUser->transfer(*target, amount))
+            {
+                messageText = "Transfer Successful!";
+                atm.saveToFile();
+                switchScreen(USER_MENU);
+            }
+            else
+            {
+                messageText = "Transfer Failed!";
+            }
+        }
+        catch (...)
+        {
+            messageText = "Invalid input!";
+        }
+        messageClock.restart();
+    }
+
+    void handleFirstSetup()
+    {
+        try
+        {
+            int type = stoi(textBoxes[0].content);
+            int accNo = stoi(textBoxes[1].content);
+            int pin = stoi(textBoxes[2].content);
+            double bal = stod(textBoxes[3].content);
+
+            if (atm.createAccount(type, accNo, pin, bal))
+            {
+                messageText = "Account Created! Now login.";
+                atm.saveToFile();
+                messageClock.restart();
+                switchScreen(MAIN_MENU);
+            }
+            else
+            {
+                messageText = "Account creation failed!";
+                messageClock.restart();
+            }
+        }
+        catch (...)
+        {
+            messageText = "Invalid input!";
+            messageClock.restart();
+        }
+    }
+
+    void handleAdminCreateAccount()
+    {
+        try
+        {
+            int type = stoi(textBoxes[0].content);
+            int accNo = stoi(textBoxes[1].content);
+            int pin = stoi(textBoxes[2].content);
+            double bal = stod(textBoxes[3].content);
+
+            if (atm.createAccount(type, accNo, pin, bal))
+            {
+                messageText = "Account Created Successfully!";
+                atm.saveToFile();
+                messageClock.restart();
+                for (int i = 0; i < 4; i++)
+                    textBoxes[i].clear();
+            }
+            else
+            {
+                messageText = "Account creation failed!";
+                messageClock.restart();
+            }
+        }
+        catch (...)
+        {
+            messageText = "Invalid input!";
+            messageClock.restart();
+        }
+    }
+};
+
+// ================= MAIN =================
+int main()
+{
+    ATMGui gui;
+    gui.run();
+
+    return 0;
+}
